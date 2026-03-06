@@ -1,0 +1,42 @@
+name: Two Pages to GitHub Pages
+
+on:
+  push:
+    branches: ["main"]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 1. 公開用のフォルダを作成
+      - name: Create Multiple Pages
+        run: |
+          mkdir public
+          
+          # 1ページ目 (index.html)
+          echo "<h1>Hello World (1ページ目)</h1>" > public/index.html
+          echo "<p><a href='local.html'>2ページ目 (Hello Local) へ行く</a></p>" >> public/index.html
+          
+          # 2ページ目 (local.html)
+          echo "<h1>Hello Local (2ページ目)</h1>" > public/local.html
+          echo "<p><a href='index.html'>1ページ目に戻る</a></p>" >> public/local.html
+          echo "<p>作成日時: $(date)</p>" >> public/local.html
+
+      # 2. アーティファクトのアップロード
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './public'
+
+      # 3. デプロイ
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
